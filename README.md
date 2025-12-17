@@ -31,18 +31,38 @@ This will create `kafka-connect-websocket-1.0.0.jar` in the `target/` directory.
 
 ### Installation
 
-The connector can be deployed in two ways: as an uber JAR with bundled dependencies, or as a plugin directory structure. Choose the method that best fits your Kafka Connect setup.
+The connector can be deployed in three ways: download a pre-built release, build an uber JAR with bundled dependencies, or use a plugin directory structure. Choose the method that best fits your Kafka Connect setup.
 
-#### Option 1: Uber JAR with Dependencies (Recommended)
+#### Option 1: Download Pre-Built Release (Fastest ⚡)
+
+Download the latest release JAR directly from GitHub:
+
+```bash
+# Download the latest release (v1.0.0)
+wget https://github.com/conduktor/kafka-connect-websocket/releases/download/v1.0.0/kafka-connect-websocket-1.0.0-jar-with-dependencies.jar
+
+# Or using curl
+curl -LO https://github.com/conduktor/kafka-connect-websocket/releases/download/v1.0.0/kafka-connect-websocket-1.0.0-jar-with-dependencies.jar
+
+# Create plugin directory
+mkdir -p $KAFKA_HOME/plugins/kafka-connect-websocket
+
+# Copy the fat JAR to your Kafka Connect plugin directory
+cp kafka-connect-websocket-1.0.0-jar-with-dependencies.jar $KAFKA_HOME/plugins/kafka-connect-websocket/
+```
+
+Then skip to **[Configure Plugin Path](#configure-plugin-path)** section below.
+
+#### Option 2: Build Uber JAR with Dependencies
 
 Build an uber JAR that includes all required dependencies (OkHttp and its transitive dependencies):
 
 ```bash
 # Build the uber JAR with dependencies
-mvn clean package shade:shade
+mvn clean package
 
-# Verify the JAR includes dependencies
-jar tf target/kafka-connect-websocket-1.0.0.jar | grep okhttp
+# Verify the fat JAR was created
+ls -lh target/kafka-connect-websocket-1.0.0-jar-with-dependencies.jar
 ```
 
 Create the plugin directory and copy the JAR:
@@ -51,11 +71,11 @@ Create the plugin directory and copy the JAR:
 # Create plugin directory
 mkdir -p $KAFKA_HOME/plugins/kafka-connect-websocket
 
-# Copy the uber JAR
-cp target/kafka-connect-websocket-1.0.0.jar $KAFKA_HOME/plugins/kafka-connect-websocket/
+# Copy the fat JAR
+cp target/kafka-connect-websocket-1.0.0-jar-with-dependencies.jar $KAFKA_HOME/plugins/kafka-connect-websocket/
 ```
 
-#### Option 2: Plugin Directory with Separate Dependencies
+#### Option 3: Plugin Directory with Separate Dependencies
 
 If your build doesn't create an uber JAR, manually package all dependencies:
 
