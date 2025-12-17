@@ -36,6 +36,7 @@ public class MockWebSocketServer implements AutoCloseable {
     private boolean shouldAcceptConnection = true;
     private int connectionDelayMs = 0;
     private WebSocket activeWebSocket;
+    private boolean autoAccept = false;
 
     public MockWebSocketServer() throws IOException {
         server = new MockWebServer();
@@ -148,9 +149,27 @@ public class MockWebSocketServer implements AutoCloseable {
     }
 
     /**
+     * Enable auto-accept mode - automatically accept all incoming connections
+     * This is useful for system tests where the client may reconnect
+     */
+    public void setAutoAccept(boolean enabled) {
+        this.autoAccept = enabled;
+        if (enabled) {
+            // Queue multiple accepts for reconnections
+            for (int i = 0; i < 10; i++) {
+                acceptNextConnectionInternal();
+            }
+        }
+    }
+
+    /**
      * Accept next WebSocket connection with custom behavior
      */
     public void acceptNextConnection() {
+        acceptNextConnectionInternal();
+    }
+
+    private void acceptNextConnectionInternal() {
         server.enqueue(new MockResponse()
             .withWebSocketUpgrade(new WebSocketListener() {
                 @Override
@@ -245,6 +264,7 @@ public class MockWebSocketServer implements AutoCloseable {
     public static class Builder {
         private boolean echoMode = false;
         private boolean shouldAccept = true;
+        private boolean autoAccept = false;
         private int delayMs = 0;
         private final List<String> initialMessages = new ArrayList<>();
 
@@ -255,6 +275,14 @@ public class MockWebSocketServer implements AutoCloseable {
 
         public Builder rejectConnections() {
             this.shouldAccept = false;
+            return this;
+        }
+
+        /**
+         * Auto-accept all incoming connections (useful for system tests)
+         */
+        public Builder autoAccept() {
+            this.autoAccept = true;
             return this;
         }
 
@@ -281,8 +309,11 @@ public class MockWebSocketServer implements AutoCloseable {
                 server.sendMessage(message);
             }
 
-            // Accept first connection by default
-            if (shouldAccept) {
+            // Auto-accept mode queues multiple accepts for reconnections
+            if (autoAccept) {
+                server.setAutoAccept(true);
+            } else if (shouldAccept) {
+                // Accept first connection by default
                 server.acceptNextConnection();
             }
 

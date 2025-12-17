@@ -67,17 +67,19 @@ services:
       timeout: 5s
       retries: 10
 
-  # Optional: Kafka UI for viewing topics
-  kafka-ui:
-    image: provectuslabs/kafka-ui:latest
-    container_name: kafka-ui
+  # Optional: Conduktor Console for viewing topics
+  console:
+    image: conduktor/conduktor-console:latest
+    container_name: conduktor-console
     depends_on:
       kafka:
         condition: service_healthy
     ports:
       - "8080:8080"
     environment:
-      KAFKA_CLUSTERS_0_NAME: local
-      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
-      KAFKA_CLUSTERS_0_KAFKACONNECT_0_NAME: local-connect
-      KAFKA_CLUSTERS_0_KAFKACONNECT_0_ADDRESS: http://kafka-connect:8083
+      CDK_CLUSTERS_0_ID: local
+      CDK_CLUSTERS_0_NAME: local
+      CDK_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+      CDK_CLUSTERS_0_KAFKACONNECTS_0_ID: local-connect
+      CDK_CLUSTERS_0_KAFKACONNECTS_0_NAME: local-connect
+      CDK_CLUSTERS_0_KAFKACONNECTS_0_URL: http://kafka-connect:8083

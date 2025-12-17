@@ -24,7 +24,7 @@ docker-compose up -d
 This starts:
 - **Kafka** (KRaft mode) on port 9092
 - **Kafka Connect** on port 8083
-- **Kafka UI** on port 8080 (optional, for viewing topics)
+- **Conduktor Console** on port 8080 (optional, for viewing topics)
 
 ## Deploy a Connector
 
@@ -57,7 +57,7 @@ curl -X POST http://localhost:8083/connectors \
 
 ## View Messages
 
-Option 1: Kafka UI at http://localhost:8080
+Option 1: Conduktor Console at http://localhost:8080
 
 Option 2: Command line:
 
