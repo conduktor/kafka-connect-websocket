@@ -26,17 +26,19 @@ The Kafka Connect WebSocket connector streams real-time data from WebSocket endp
 | **Configuration** | JSON config files | Code changes |
 | **Scalability** | Kafka Connect clustering | DIY clustering |
 
-### Is this production-ready?
+### Operational Features
 
-Yes, the connector is production-ready with:
+The connector includes:
 
-- Comprehensive error handling
-- Automatic reconnection logic
-- JMX metrics for monitoring
-- Extensive logging
-- Integration with Prometheus/Grafana
+- Comprehensive error handling and automatic reconnection
+- JMX metrics with Prometheus/Grafana integration
+- Operational runbooks (see `docs/operations/RUNBOOK.md`)
+- 91 tests covering integration, resources, offsets, and edge cases
+- Extensive logging and troubleshooting guides
 
-However, understand the at-most-once semantics (see README) and data loss scenarios before production deployment.
+**⚠️ Important: At-Most-Once Delivery Semantics**
+
+This connector provides at-most-once delivery due to architectural limitations (in-memory buffering, no WebSocket replay capability). Messages can be lost during shutdowns, crashes, or network failures. Best suited for telemetry, monitoring, and scenarios where occasional data loss is acceptable. See the README for detailed data loss scenarios and mitigation strategies.
 
 ## Installation & Setup
 
