@@ -2,6 +2,8 @@
 
 A Kafka Connect source connector for streaming real-time data from WebSocket endpoints into Apache Kafka topics.
 
+**[Documentation](https://conduktor.github.io/kafka-connect-websocket)** | **[Quick Start with Docker](examples/)**
+
 ## Features
 
 - Stream from any WebSocket endpoint (ws:// or wss://)
