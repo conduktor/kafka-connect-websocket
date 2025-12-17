@@ -11,45 +11,23 @@ Stream real-time data from any WebSocket endpoint directly into Apache Kafka wit
 
 ## Features
 
-<div class="grid cards" markdown>
+### :material-flash: Real-Time Streaming
+Connect to any WebSocket endpoint (ws:// or wss://) and stream data directly into Kafka topics with minimal latency.
 
-- :material-flash:{ .lg .middle } **Real-Time Streaming**
+### :material-sync: Automatic Reconnection
+Built-in reconnection logic with configurable intervals ensures resilient connections even when endpoints are unstable.
 
-    ---
+### :material-shield-lock: Authentication Support
+Bearer token authentication and custom headers for connecting to secured WebSocket APIs.
 
-    Connect to any WebSocket endpoint (ws:// or wss://) and stream data directly into Kafka topics with minimal latency.
+### :material-message-processing: Subscription Messages
+Send subscription messages after connection to exchanges like Binance, Coinbase, and custom WebSocket servers.
 
-- :material-sync:{ .lg .middle } **Automatic Reconnection**
+### :material-gauge: Built-in Monitoring
+Comprehensive metrics via JMX, detailed logging, and integration with Prometheus/Grafana for production observability.
 
-    ---
-
-    Built-in reconnection logic with configurable intervals ensures resilient connections even when endpoints are unstable.
-
-- :material-shield-lock:{ .lg .middle } **Authentication Support**
-
-    ---
-
-    Bearer token authentication and custom headers for connecting to secured WebSocket APIs.
-
-- :material-message-processing:{ .lg .middle } **Subscription Messages**
-
-    ---
-
-    Send subscription messages after connection to exchanges like Binance, Coinbase, and custom WebSocket servers.
-
-- :material-gauge:{ .lg .middle } **Built-in Monitoring**
-
-    ---
-
-    Comprehensive metrics via JMX, detailed logging, and integration with Prometheus/Grafana for production observability.
-
-- :material-buffer:{ .lg .middle } **Message Buffering**
-
-    ---
-
-    Configurable in-memory queue to handle traffic bursts and optimize throughput to Kafka.
-
-</div>
+### :material-buffer: Message Buffering
+Configurable in-memory queue to handle traffic bursts and optimize throughput to Kafka.
 
 ## Quick Example
 

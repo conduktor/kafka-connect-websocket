@@ -74,27 +74,14 @@ plugin.path=/usr/local/share/kafka/plugins
 
 ## Quick Links
 
-<div class="grid cards" markdown>
+### :material-book-open: [Main README](https://github.com/conduktor/kafka-connect-websocket/blob/main/README.md)
+Complete documentation with installation, configuration, and usage examples.
 
-- :material-book-open:{ .lg .middle } **[Main README](https://github.com/conduktor/kafka-connect-websocket/blob/main/README.md)**
+### :material-help-circle: [FAQ](../faq.md)
+Frequently asked questions and troubleshooting tips.
 
-    ---
-
-    Complete documentation with installation, configuration, and usage examples.
-
-- :material-help-circle:{ .lg .middle } **[FAQ](../faq.md)**
-
-    ---
-
-    Frequently asked questions and troubleshooting tips.
-
-- :material-history:{ .lg .middle } **[Changelog](../changelog.md)**
-
-    ---
-
-    Version history, new features, and bug fixes.
-
-</div>
+### :material-history: [Changelog](../changelog.md)
+Version history, new features, and bug fixes.
 
 ## Before You Begin
 
