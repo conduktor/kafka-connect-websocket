@@ -4,11 +4,98 @@ This runbook provides operational guidance for monitoring, troubleshooting, and 
 
 ## Table of Contents
 
+- [Incident Response Decision Tree](#incident-response-decision-tree)
 - [Monitoring](#monitoring)
 - [Common Issues](#common-issues)
 - [Performance Tuning](#performance-tuning)
 - [Troubleshooting](#troubleshooting)
 - [Recovery Procedures](#recovery-procedures)
+
+## Incident Response Decision Tree
+
+Use this decision tree when an alert fires or an issue is reported:
+
+```
+START: Alert or Issue Reported
+│
+├─ Is connector in RUNNING state?
+│  │  curl http://localhost:8083/connectors/<name>/status | jq '.connector.state'
+│  │
+│  └─ NO → Go to [Connector Not Running](#issue-connector-not-running)
+│  └─ YES → Continue ↓
+│
+├─ Is WebSocket connected? (isConnected = true)
+│  │  Check JMX: io.conduktor.connect.websocket:*/isConnected
+│  │
+│  └─ NO → Go to [Connection Issues](#issue-1-connection-keeps-dropping)
+│  └─ YES → Continue ↓
+│
+├─ Are messages being received? (MessagesReceived increasing)
+│  │  Check JMX: io.conduktor.connect.websocket:*/MessagesReceived
+│  │
+│  └─ NO → Go to [No Messages Received](#issue-3-no-messages-received)
+│  └─ YES → Continue ↓
+│
+├─ Is queue near capacity? (QueueUtilizationPercent > 80%)
+│  │  Check JMX: io.conduktor.connect.websocket:*/QueueUtilizationPercent
+│  │
+│  └─ YES → Go to [High Message Drop Rate](#issue-2-high-message-drop-rate)
+│  └─ NO → Continue ↓
+│
+├─ Is Kafka write lagging? (RecordsProduced << MessagesReceived)
+│  │  Check lag: MessagesReceived - RecordsProduced > 10000
+│  │
+│  └─ YES → Go to [Processing Lag](#issue-4-processing-lag-building-up)
+│  └─ NO → Continue ↓
+│
+└─ Check logs for errors
+   │  grep "ERROR\|WARN" $KAFKA_HOME/logs/connect.log | tail -50
+   │
+   └─ Errors found → Match error to [Common Issues](#common-issues)
+   └─ No errors → Monitor, escalate if issue persists
+```
+
+### Quick Commands Reference
+
+```bash
+# Check connector status
+curl -s http://localhost:8083/connectors/<name>/status | jq .
+
+# Restart connector
+curl -X POST http://localhost:8083/connectors/<name>/restart
+
+# Restart specific task
+curl -X POST http://localhost:8083/connectors/<name>/tasks/0/restart
+
+# Check recent logs
+tail -100 $KAFKA_HOME/logs/connect.log | grep -E "WebSocket|ERROR|WARN"
+
+# Check JMX metrics (requires jmxterm)
+echo "get -b io.conduktor.connect.websocket:* isConnected" | \
+  java -jar jmxterm.jar -l localhost:9999
+```
+
+### Issue: Connector Not Running
+
+**Symptoms**: Connector state is FAILED or task state is FAILED
+
+**Quick Fix**:
+```bash
+# Check the error message
+curl -s http://localhost:8083/connectors/<name>/status | jq '.tasks[0].trace'
+
+# Restart connector
+curl -X POST http://localhost:8083/connectors/<name>/restart
+
+# If still failing, check config and redeploy
+curl -X DELETE http://localhost:8083/connectors/<name>
+curl -X POST http://localhost:8083/connectors -H "Content-Type: application/json" -d @connector.json
+```
+
+**Common Causes**:
+- Invalid configuration (bad URL, malformed JSON)
+- Authentication failure
+- Missing dependencies (ClassNotFoundException)
 
 ## Monitoring
 

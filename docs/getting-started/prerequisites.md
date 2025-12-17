@@ -163,6 +163,42 @@ Expected response:
 }
 ```
 
+### Internal Topics Configuration
+
+Kafka Connect in distributed mode requires three internal topics. These are typically auto-created, but for production you should pre-create them with proper replication:
+
+```properties
+# In connect-distributed.properties
+offset.storage.topic=connect-offsets
+offset.storage.replication.factor=3
+offset.storage.partitions=25
+
+config.storage.topic=connect-configs
+config.storage.replication.factor=3
+config.storage.partitions=1
+
+status.storage.topic=connect-status
+status.storage.replication.factor=3
+status.storage.partitions=5
+```
+
+!!! info "Topic Purpose"
+    - **connect-offsets**: Stores source connector offsets (committed but not usable for replay with this WebSocket connector)
+    - **connect-configs**: Stores connector and task configurations
+    - **connect-status**: Stores connector and task status
+
+### Producer Configuration
+
+Configure producer settings for source connectors in `connect-distributed.properties`:
+
+```properties
+# Optimize for throughput
+producer.linger.ms=10
+producer.batch.size=32768
+producer.compression.type=lz4
+producer.acks=1
+```
+
 ### Plugin Directory
 
 Verify the plugin path is configured:
@@ -215,6 +251,63 @@ Configure heap size for Kafka Connect:
 ```bash
 # In connect-distributed.sh or systemd service
 export KAFKA_HEAP_OPTS="-Xms2G -Xmx2G"
+```
+
+## Security Configuration
+
+### Secure JMX Access
+
+For production, enable JMX authentication:
+
+```bash
+# Create password file
+echo "admin changeit" > /etc/kafka/jmx.password
+chmod 600 /etc/kafka/jmx.password
+
+# Create access file
+echo "admin readwrite" > /etc/kafka/jmx.access
+chmod 644 /etc/kafka/jmx.access
+
+# Configure Kafka Connect
+export KAFKA_JMX_OPTS="-Dcom.sun.management.jmxremote \
+  -Dcom.sun.management.jmxremote.authenticate=true \
+  -Dcom.sun.management.jmxremote.password.file=/etc/kafka/jmx.password \
+  -Dcom.sun.management.jmxremote.access.file=/etc/kafka/jmx.access \
+  -Dcom.sun.management.jmxremote.ssl=true"
+```
+
+!!! danger "Never Run JMX Without Authentication in Production"
+    Default JMX configuration with `authenticate=false` exposes your connector to unauthorized access.
+
+### Protect Authentication Tokens
+
+Do NOT store tokens in plaintext config files. Use Kafka Connect's ConfigProvider:
+
+```json
+{
+  "websocket.auth.token": "${file:/etc/kafka/secrets.properties:websocket.token}",
+  "config.providers": "file",
+  "config.providers.file.class": "org.apache.kafka.common.config.provider.FileConfigProvider"
+}
+```
+
+Create `/etc/kafka/secrets.properties` with restricted permissions:
+
+```bash
+echo "websocket.token=your-secret-token" > /etc/kafka/secrets.properties
+chmod 600 /etc/kafka/secrets.properties
+```
+
+### SSL/TLS for WebSocket
+
+For `wss://` endpoints, ensure Java trusts the server certificate:
+
+```bash
+# Add certificate to truststore
+keytool -import -trustcacerts -alias myserver \
+  -file server.crt \
+  -keystore $JAVA_HOME/lib/security/cacerts \
+  -storepass changeit
 ```
 
 ## Optional Tools
