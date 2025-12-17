@@ -162,7 +162,8 @@ public class WebSocketSourceConnectorConfig extends AbstractConfig {
     }
 
     public String getAuthToken() {
-        return getPassword(AUTH_TOKEN_CONFIG).value();
+        org.apache.kafka.common.config.types.Password password = getPassword(AUTH_TOKEN_CONFIG);
+        return password != null ? password.value() : null;
     }
 
     public int getMessageQueueSize() {
