@@ -28,6 +28,8 @@ This starts:
 
 ## Deploy a Connector
 
+You can deploy connectors via Conduktor Console at http://localhost:8080 or via the REST API.
+
 Wait for Kafka Connect to be ready:
 
 ```bash
