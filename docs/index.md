@@ -102,7 +102,7 @@ The connector uses OkHttp's WebSocket client for reliable connections, maintains
 | Reconnection logic | ✅ Built-in | ⚠️ Custom code | ⚠️ Custom code |
 | Monitoring | ✅ JMX/Prometheus | ⚠️ Custom | ⚠️ Custom |
 | Deployment | ✅ Kafka Connect | ❌ Separate service | ❌ Separate service |
-| Maintenance | ✅ Production-ready | ⚠️ DIY | ⚠️ DIY |
+| Maintenance | ✅ Integrated | ⚠️ DIY | ⚠️ DIY |
 
 ## Performance
 
@@ -111,20 +111,26 @@ The connector uses OkHttp's WebSocket client for reliable connections, maintains
 - **Reliability**: Automatic reconnection with exponential backoff
 - **Scalability**: Configurable queue size for traffic bursts
 
-## Production Ready
+## Operational Features
 
-Built for production deployments with:
+Includes comprehensive operational tooling:
 
-- Comprehensive error handling and logging
+- Detailed error handling and structured logging
 - JMX metrics for Prometheus/Grafana integration
-- Health check endpoints
-- Graceful shutdown handling
+- Automatic reconnection with exponential backoff
+- Configurable message buffering
 - Extensive troubleshooting documentation
 
-## Data Reliability
+## ⚠️ Important: Data Delivery Semantics
 
-!!! warning "At-Most-Once Semantics"
-    This connector implements **at-most-once** delivery semantics. Messages in the in-memory queue are lost on connector shutdown or crashes. See the README for details and mitigation strategies.
+!!! warning "At-Most-Once Delivery"
+    This connector provides **at-most-once** delivery semantics due to architectural limitations:
+
+    - **In-memory buffering**: Messages in the queue are lost on shutdown/crashes
+    - **No replay capability**: WebSocket protocol doesn't support message replay
+    - **Single task limitation**: WebSocket connections don't shard like Kafka partitions
+
+    **Use cases**: Best suited for telemetry, monitoring, and scenarios where occasional data loss is acceptable. For critical data, consider additional validation or complementary ingestion methods. See the README for detailed mitigation strategies.
 
 ## Community & Support
 
