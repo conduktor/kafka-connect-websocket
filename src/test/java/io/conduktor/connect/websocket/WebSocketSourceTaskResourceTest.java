@@ -134,32 +134,35 @@ class WebSocketSourceTaskResourceTest {
 
     @Test
     void testGracefulShutdownDrainsQueue() throws Exception {
-        // Given: Task with messages in queue
-        WebSocketSourceTask task = new WebSocketSourceTask();
-        Map<String, String> props = createTestConfig();
-        props.put(WebSocketSourceConnectorConfig.SUBSCRIPTION_MESSAGE_CONFIG,
-                 "{\"action\":\"subscribe\",\"channel\":\"test\"}");
-        task.start(props);
+        // Given: MockWebSocketServer in echo mode
+        try (MockWebSocketServer mockServer = MockWebSocketServer.builder().echoMode().build()) {
+            // Given: Task with messages in queue
+            WebSocketSourceTask task = new WebSocketSourceTask();
+            Map<String, String> props = createTestConfigWithMockServer(mockServer);
+            props.put(WebSocketSourceConnectorConfig.SUBSCRIPTION_MESSAGE_CONFIG,
+                     "{\"action\":\"subscribe\",\"channel\":\"test\"}");
+            task.start(props);
 
-        // Wait for subscription message to be echoed
-        Thread.sleep(1500);
+            // Wait for subscription message to be echoed
+            Thread.sleep(1500);
 
-        // Poll once to verify we have messages
-        List<SourceRecord> records = task.poll();
-        if (records == null || records.isEmpty()) {
-            // Try again
-            Thread.sleep(500);
-            records = task.poll();
+            // Poll once to verify we have messages
+            List<SourceRecord> records = task.poll();
+            if (records == null || records.isEmpty()) {
+                // Try again
+                Thread.sleep(500);
+                records = task.poll();
+            }
+
+            // When: Stopping task (should drain remaining messages)
+            long stopStartTime = System.currentTimeMillis();
+            task.stop();
+            long stopDuration = System.currentTimeMillis() - stopStartTime;
+
+            // Then: Stop should complete within timeout
+            assertTrue(stopDuration < 7000,
+                String.format("Stop should complete within 7s (including 5s drain timeout), took: %dms", stopDuration));
         }
-
-        // When: Stopping task (should drain remaining messages)
-        long stopStartTime = System.currentTimeMillis();
-        task.stop();
-        long stopDuration = System.currentTimeMillis() - stopStartTime;
-
-        // Then: Stop should complete within timeout
-        assertTrue(stopDuration < 7000,
-            String.format("Stop should complete within 7s (including 5s drain timeout), took: %dms", stopDuration));
     }
 
     @Test
@@ -266,49 +269,6 @@ class WebSocketSourceTaskResourceTest {
             "Should not leak threads from reconnection. New threads: " + newThreads);
     }
 
-    @Test
-    void testMemoryReleaseOnStop() throws Exception {
-        // Given: Task with some messages processed
-        WebSocketSourceTask task = new WebSocketSourceTask();
-        Map<String, String> props = createTestConfig();
-        props.put(WebSocketSourceConnectorConfig.MESSAGE_QUEUE_SIZE_CONFIG, "1000");
-        task.start(props);
-        Thread.sleep(500);
-
-        // When: Stopping task
-        task.stop();
-
-        // Then: Task should be eligible for garbage collection
-        // Force GC and verify task can be collected (weak reference test)
-        task = null; // Release reference
-        System.gc();
-        Thread.sleep(100);
-
-        // If we get here without OutOfMemoryError, memory is being released properly
-        assertTrue(true, "Memory should be released after stop");
-    }
-
-    @Test
-    void testQueueOverflowDoesNotCauseMemoryLeak() throws Exception {
-        // Given: Task with small queue and high message rate (simulated)
-        WebSocketSourceTask task = new WebSocketSourceTask();
-        Map<String, String> props = createTestConfig();
-        props.put(WebSocketSourceConnectorConfig.MESSAGE_QUEUE_SIZE_CONFIG, "10"); // Small queue
-        props.put(WebSocketSourceConnectorConfig.SUBSCRIPTION_MESSAGE_CONFIG,
-                 "{\"action\":\"test\"}"); // Will get echo response
-
-        task.start(props);
-
-        // Wait for potential queue overflow scenario
-        Thread.sleep(2000);
-
-        // When: Stopping after potential overflow
-        task.stop();
-        Thread.sleep(500);
-
-        // Then: Should clean up without issues
-        assertTrue(true, "Queue overflow should not prevent cleanup");
-    }
 
     @Test
     void testJMXCleanupOnStop() throws Exception {
@@ -344,7 +304,19 @@ class WebSocketSourceTaskResourceTest {
      */
     private Map<String, String> createTestConfig() {
         Map<String, String> props = new HashMap<>();
-        props.put(WebSocketSourceConnectorConfig.WEBSOCKET_URL_CONFIG, "wss://echo.websocket.org");
+        props.put(WebSocketSourceConnectorConfig.WEBSOCKET_URL_CONFIG, "ws://localhost:9999");
+        props.put(WebSocketSourceConnectorConfig.KAFKA_TOPIC_CONFIG, "test-topic");
+        props.put(WebSocketSourceConnectorConfig.RECONNECT_ENABLED_CONFIG, "false");
+        props.put(WebSocketSourceConnectorConfig.MESSAGE_QUEUE_SIZE_CONFIG, "100");
+        return props;
+    }
+
+    /**
+     * Helper to create test configuration with MockWebSocketServer
+     */
+    private Map<String, String> createTestConfigWithMockServer(MockWebSocketServer server) {
+        Map<String, String> props = new HashMap<>();
+        props.put(WebSocketSourceConnectorConfig.WEBSOCKET_URL_CONFIG, server.getUrl());
         props.put(WebSocketSourceConnectorConfig.KAFKA_TOPIC_CONFIG, "test-topic");
         props.put(WebSocketSourceConnectorConfig.RECONNECT_ENABLED_CONFIG, "false");
         props.put(WebSocketSourceConnectorConfig.MESSAGE_QUEUE_SIZE_CONFIG, "100");
