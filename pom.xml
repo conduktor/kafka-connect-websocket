@@ -82,6 +82,14 @@
             <version>${slf4j.version}</version>
             <scope>test</scope>
         </dependency>
+
+        <!-- MockWebServer for WebSocket testing -->
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>mockwebserver</artifactId>
+            <version>${okhttp.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>

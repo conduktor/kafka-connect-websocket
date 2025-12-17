@@ -55,9 +55,10 @@ public class WebSocketMetrics implements WebSocketMetricsMBean, AutoCloseable {
     private String sanitizeUrl(String url) {
         if (url == null) return "unknown";
         // Remove protocol and special characters for JMX name
-        return url.replaceAll("^(ws|wss)://", "")
-                  .replaceAll("[^a-zA-Z0-9._-]", "_")
-                  .substring(0, Math.min(50, url.length())); // Limit length
+        String sanitized = url.replaceAll("^(ws|wss)://", "")
+                              .replaceAll("[^a-zA-Z0-9._-]", "_");
+        // Limit length
+        return sanitized.substring(0, Math.min(50, sanitized.length()));
     }
 
     // Metric update methods

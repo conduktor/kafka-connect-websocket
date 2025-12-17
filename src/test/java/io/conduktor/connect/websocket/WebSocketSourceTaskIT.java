@@ -59,7 +59,7 @@ class WebSocketSourceTaskIT {
     }
 
     @Test
-    void testTaskStartWithInvalidUrl() {
+    void testTaskStartWithInvalidUrl() throws Exception {
         Map<String, String> props = new HashMap<>();
         props.put(WebSocketSourceConnectorConfig.WEBSOCKET_URL_CONFIG, "ws://invalid.url.that.does.not.exist.12345");
         props.put(WebSocketSourceConnectorConfig.KAFKA_TOPIC_CONFIG, "test-topic");
@@ -67,6 +67,14 @@ class WebSocketSourceTaskIT {
 
         // Should start without throwing (connection happens asynchronously)
         assertDoesNotThrow(() -> task.start(props));
+
+        // Wait for connection attempt
+        Thread.sleep(1000);
+
+        // Polling should return null (no connection established)
+        List<SourceRecord> records = task.poll();
+        assertTrue(records == null || records.isEmpty(),
+            "Should not receive records when URL is invalid");
 
         // Stop should also work fine
         assertDoesNotThrow(() -> task.stop());
@@ -100,9 +108,21 @@ class WebSocketSourceTaskIT {
         assertFalse(records.isEmpty(), "Should have at least one record");
 
         SourceRecord record = records.get(0);
-        assertEquals("test-topic", record.topic());
-        assertNotNull(record.value());
-        assertTrue(record.value().toString().contains("subscribe"));
+        assertEquals("test-topic", record.topic(), "Topic should match configuration");
+        assertNotNull(record.value(), "Record value should not be null");
+        assertTrue(record.value().toString().contains("subscribe"),
+            "Echo should contain 'subscribe': " + record.value());
+
+        // Verify offset structure
+        Map<String, ?> offset = record.sourceOffset();
+        assertNotNull(offset, "Offset should not be null");
+        assertTrue(offset.containsKey("session_id"), "Offset should contain session_id");
+        assertTrue(offset.containsKey("sequence"), "Offset should contain sequence");
+
+        // Verify partition structure
+        Map<String, ?> partition = record.sourcePartition();
+        assertNotNull(partition, "Partition should not be null");
+        assertTrue(partition.containsKey("websocket_url"), "Partition should contain websocket_url");
 
         task.stop();
     }
