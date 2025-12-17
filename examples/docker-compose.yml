@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   kafka:
     image: apache/kafka:3.9.0
@@ -7,25 +5,25 @@ services:
     container_name: kafka
     ports:
       - "9092:9092"
-      - "9093:9093"
     environment:
       KAFKA_NODE_ID: 1
       KAFKA_PROCESS_ROLES: broker,controller
-      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
-      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@localhost:9093
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
-      CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
+      KAFKA_LOG_DIRS: /tmp/kraft-combined-logs
     healthcheck:
-      test: ["CMD", "kafka-topics.sh", "--bootstrap-server", "localhost:9092", "--list"]
+      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --list || exit 1"]
       interval: 10s
-      timeout: 5s
-      retries: 5
+      timeout: 10s
+      retries: 10
+      start_period: 30s
 
   kafka-connect:
     image: apache/kafka:3.9.0
@@ -40,32 +38,29 @@ services:
       KAFKA_HEAP_OPTS: "-Xms512M -Xmx1G"
     volumes:
       - ../target:/opt/kafka/plugins/kafka-connect-websocket
-    command: >
-      bash -c "
-        # Create Connect configuration
-        cat > /tmp/connect-standalone.properties << 'EOF'
-      bootstrap.servers=kafka:9092
-      key.converter=org.apache.kafka.connect.storage.StringConverter
-      value.converter=org.apache.kafka.connect.storage.StringConverter
-      offset.storage.file.filename=/tmp/connect.offsets
-      offset.flush.interval.ms=10000
-      plugin.path=/opt/kafka/plugins
-      rest.host.name=0.0.0.0
-      rest.port=8083
-      EOF
-
-        # Wait for Kafka to be ready
+    command:
+      - bash
+      - -c
+      - |
+        cat > /tmp/connect-standalone.properties << 'PROPS'
+        bootstrap.servers=kafka:9092
+        key.converter=org.apache.kafka.connect.storage.StringConverter
+        value.converter=org.apache.kafka.connect.storage.StringConverter
+        offset.storage.file.filename=/tmp/connect.offsets
+        offset.flush.interval.ms=10000
+        plugin.path=/opt/kafka/plugins
+        rest.host.name=0.0.0.0
+        rest.port=8083
+        PROPS
         echo 'Waiting for Kafka...'
-        sleep 10
-
-        # Start Kafka Connect
+        sleep 5
         /opt/kafka/bin/connect-standalone.sh /tmp/connect-standalone.properties
-      "
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8083/"]
+      test: ["CMD-SHELL", "curl -f http://localhost:8083/ || exit 1"]
       interval: 10s
       timeout: 5s
-      retries: 10
+      retries: 15
+      start_period: 30s
 
   # Optional: Conduktor Console for viewing topics
   console:
