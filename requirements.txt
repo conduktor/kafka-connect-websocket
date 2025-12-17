@@ -1,0 +1,15 @@
+# Python dependencies for MkDocs documentation
+
+# Core MkDocs
+mkdocs>=1.5.3
+
+# Material theme
+mkdocs-material>=9.5.0
+
+# Plugins
+mkdocs-minify-plugin>=0.8.0
+mkdocs-redirects>=1.2.1
+mkdocs-git-revision-date-localized-plugin>=1.2.0
+
+# Optional enhancements
+pymdown-extensions>=10.7

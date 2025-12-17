@@ -4,7 +4,10 @@ import org.apache.kafka.common.config.AbstractConfig;
 import org.apache.kafka.common.config.ConfigDef;
 import org.apache.kafka.common.config.ConfigDef.Importance;
 import org.apache.kafka.common.config.ConfigDef.Type;
+import org.apache.kafka.common.config.ConfigException;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Map;
 
 /**
@@ -40,6 +43,12 @@ public class WebSocketSourceConnectorConfig extends AbstractConfig {
     public static final String CONNECTION_TIMEOUT_MS_CONFIG = "websocket.connection.timeout.ms";
     private static final String CONNECTION_TIMEOUT_MS_DOC = "Connection timeout in milliseconds";
 
+    public static final String RECONNECT_MAX_ATTEMPTS_CONFIG = "websocket.reconnect.max.attempts";
+    private static final String RECONNECT_MAX_ATTEMPTS_DOC = "Maximum number of reconnection attempts (-1 for infinite)";
+
+    public static final String RECONNECT_BACKOFF_MAX_MS_CONFIG = "websocket.reconnect.backoff.max.ms";
+    private static final String RECONNECT_BACKOFF_MAX_MS_DOC = "Maximum backoff delay for exponential backoff in milliseconds";
+
     public static final ConfigDef CONFIG_DEF = createConfigDef();
 
     private static ConfigDef createConfigDef() {
@@ -48,6 +57,7 @@ public class WebSocketSourceConnectorConfig extends AbstractConfig {
                         WEBSOCKET_URL_CONFIG,
                         Type.STRING,
                         ConfigDef.NO_DEFAULT_VALUE,
+                        new WebSocketUrlValidator(),
                         Importance.HIGH,
                         WEBSOCKET_URL_DOC
                 )
@@ -88,7 +98,7 @@ public class WebSocketSourceConnectorConfig extends AbstractConfig {
                 )
                 .define(
                         AUTH_TOKEN_CONFIG,
-                        Type.STRING,
+                        Type.PASSWORD,
                         null,
                         Importance.MEDIUM,
                         AUTH_TOKEN_DOC
@@ -106,6 +116,20 @@ public class WebSocketSourceConnectorConfig extends AbstractConfig {
                         30000L,
                         Importance.LOW,
                         CONNECTION_TIMEOUT_MS_DOC
+                )
+                .define(
+                        RECONNECT_MAX_ATTEMPTS_CONFIG,
+                        Type.INT,
+                        -1,
+                        Importance.MEDIUM,
+                        RECONNECT_MAX_ATTEMPTS_DOC
+                )
+                .define(
+                        RECONNECT_BACKOFF_MAX_MS_CONFIG,
+                        Type.LONG,
+                        60000L,
+                        Importance.MEDIUM,
+                        RECONNECT_BACKOFF_MAX_MS_DOC
                 );
     }
 
@@ -138,7 +162,7 @@ public class WebSocketSourceConnectorConfig extends AbstractConfig {
     }
 
     public String getAuthToken() {
-        return getString(AUTH_TOKEN_CONFIG);
+        return getPassword(AUTH_TOKEN_CONFIG).value();
     }
 
     public int getMessageQueueSize() {
@@ -147,5 +171,60 @@ public class WebSocketSourceConnectorConfig extends AbstractConfig {
 
     public long getConnectionTimeoutMs() {
         return getLong(CONNECTION_TIMEOUT_MS_CONFIG);
+    }
+
+    public int getMaxReconnectAttempts() {
+        return getInt(RECONNECT_MAX_ATTEMPTS_CONFIG);
+    }
+
+    public long getMaxBackoffMs() {
+        return getLong(RECONNECT_BACKOFF_MAX_MS_CONFIG);
+    }
+
+    /**
+     * Validator for WebSocket URL configuration.
+     * Ensures the URL uses ws:// or wss:// scheme and has valid URI syntax.
+     */
+    private static class WebSocketUrlValidator implements ConfigDef.Validator {
+        @Override
+        public void ensureValid(String name, Object value) {
+            if (value == null) {
+                throw new ConfigException(name, value, "WebSocket URL cannot be null");
+            }
+
+            String url = (String) value;
+            if (url.trim().isEmpty()) {
+                throw new ConfigException(name, value, "WebSocket URL cannot be empty");
+            }
+
+            try {
+                URI uri = new URI(url);
+                String scheme = uri.getScheme();
+
+                if (scheme == null) {
+                    throw new ConfigException(name, value,
+                        "WebSocket URL must have a scheme (ws:// or wss://)");
+                }
+
+                if (!scheme.equalsIgnoreCase("ws") && !scheme.equalsIgnoreCase("wss")) {
+                    throw new ConfigException(name, value,
+                        "WebSocket URL must use ws:// or wss:// scheme, got: " + scheme);
+                }
+
+                if (uri.getHost() == null || uri.getHost().isEmpty()) {
+                    throw new ConfigException(name, value,
+                        "WebSocket URL must have a valid host");
+                }
+
+            } catch (URISyntaxException e) {
+                throw new ConfigException(name, value,
+                    "Invalid WebSocket URL syntax: " + e.getMessage());
+            }
+        }
+
+        @Override
+        public String toString() {
+            return "Valid WebSocket URL with ws:// or wss:// scheme";
+        }
     }
 }
