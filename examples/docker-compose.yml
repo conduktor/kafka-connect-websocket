@@ -63,15 +63,37 @@ services:
       start_period: 30s
 
   # Optional: Conduktor Console for viewing topics
+  # Start with: docker-compose --profile ui up -d
+  postgresql:
+    image: postgres:14
+    container_name: postgresql
+    hostname: postgresql
+    profiles:
+      - ui
+    environment:
+      POSTGRES_DB: conduktor-console
+      POSTGRES_USER: conduktor
+      POSTGRES_PASSWORD: conduktor
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U conduktor -d conduktor-console"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   console:
     image: conduktor/conduktor-console:latest
     container_name: conduktor-console
+    profiles:
+      - ui
     depends_on:
       kafka:
+        condition: service_healthy
+      postgresql:
         condition: service_healthy
     ports:
       - "8080:8080"
     environment:
+      CDK_DATABASE_URL: postgresql://conduktor:conduktor@postgresql:5432/conduktor-console
       CDK_CLUSTERS_0_ID: local
       CDK_CLUSTERS_0_NAME: local
       CDK_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
