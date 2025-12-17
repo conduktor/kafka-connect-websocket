@@ -146,7 +146,7 @@ Built for production deployments with:
 ## Data Reliability
 
 !!! warning "At-Most-Once Semantics"
-    This connector implements **at-most-once** delivery semantics. Messages in the in-memory queue are lost on connector shutdown or crashes. See [Data Reliability](reliability/index.md) for details and mitigation strategies.
+    This connector implements **at-most-once** delivery semantics. Messages in the in-memory queue are lost on connector shutdown or crashes. See the README for details and mitigation strategies.
 
 ## Community & Support
 
@@ -164,8 +164,8 @@ Apache License 2.0 - see [LICENSE](https://github.com/conduktor/kafka-connect-we
 
 ## Ready to Get Started?
 
-[Installation Guide](getting-started/installation.md){ .md-button .md-button--primary }
-[Configuration Reference](configuration/index.md){ .md-button }
-[View Examples](use-cases/index.md){ .md-button }
+[Getting Started Guide](getting-started/index.md){ .md-button .md-button--primary }
+[View on GitHub](https://github.com/conduktor/kafka-connect-websocket){ .md-button }
+[See FAQ](faq.md){ .md-button }
 
 </div>

@@ -36,7 +36,7 @@ Yes, the connector is production-ready with:
 - Extensive logging
 - Integration with Prometheus/Grafana
 
-However, understand the at-most-once semantics (see README) and data loss scenarios before production deployment.
+However, understand the [at-most-once semantics](reliability/semantics.md) and data loss scenarios before production deployment.
 
 ## Installation & Setup
 
@@ -181,7 +181,7 @@ Check logs for specific error messages.
 - Messages are never duplicated
 - No offset tracking (WebSocket protocol limitation)
 
-See Data Reliability section in the README for detailed information.
+See [Data Reliability](reliability/index.md) for detailed information.
 
 ### Will I lose data if the connector crashes?
 
@@ -192,7 +192,7 @@ See Data Reliability section in the README for detailed information.
 - Kafka Connect worker failure
 - Network interruptions
 
-Mitigation strategies: Data Loss Scenarios in the README
+Mitigation strategies: [Data Loss Scenarios](reliability/data-loss.md)
 
 ### Can I replay historical WebSocket data?
 
@@ -245,7 +245,7 @@ Three monitoring approaches:
    curl http://localhost:8083/connectors/websocket-connector/status
    ```
 
-See Monitoring section in the README for detailed setup.
+See [Monitoring Guide](operations/monitoring.md) for detailed setup.
 
 ### What metrics should I alert on?
 
@@ -285,7 +285,7 @@ Common diagnostics:
    curl -i -H "Authorization: Bearer TOKEN" https://api.example.com/
    ```
 
-See Troubleshooting section in the README for detailed solutions.
+See [Troubleshooting Guide](operations/troubleshooting.md) for detailed solutions.
 
 ### How do I update connector configuration?
 
@@ -398,7 +398,7 @@ Yes! Contributions are welcome:
 2. Create a feature branch
 3. Submit a pull request
 
-See Contributing section in the README for details.
+See [Contributing Guide](development/contributing.md) for details.
 
 ### How do I run tests locally?
 
@@ -536,4 +536,4 @@ COPY kotlin-stdlib-*.jar /usr/share/confluent-hub-components/kafka-connect-webso
 
 - **GitHub Issues**: [Open an issue](https://github.com/conduktor/kafka-connect-websocket/issues)
 - **Slack Community**: [Join Conduktor Slack](https://conduktor.io/slack)
-- **Documentation**: [Browse documentation](https://conduktor.github.io/kafka-connect-websocket/)
+- **Documentation**: [Browse full docs](index.md)

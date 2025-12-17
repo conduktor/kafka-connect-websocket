@@ -299,9 +299,9 @@ curl -i -N \
 
 Once all prerequisites are met:
 
-1. [Installation](installation.md) - Install the connector
-2. [Quick Start](quick-start.md) - Deploy your first connector
+1. [Installation](https://github.com/conduktor/kafka-connect-websocket/blob/main/README.md#installation) - Install the connector
+2. [Quick Start](https://github.com/conduktor/kafka-connect-websocket/blob/main/README.md#usage-examples) - Deploy your first connector
 
 ---
 
-**Need help?** Check our [Troubleshooting Guide](../operations/troubleshooting.md) or [open an issue](https://github.com/conduktor/kafka-connect-websocket/issues).
+**Need help?** Check our [FAQ](../faq.md) or [open an issue](https://github.com/conduktor/kafka-connect-websocket/issues).

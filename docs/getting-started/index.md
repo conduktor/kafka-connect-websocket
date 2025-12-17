@@ -1,6 +1,6 @@
 # Getting Started
 
-This guide will help you install, configure, and deploy your first Kafka Connect WebSocket connector in under 30 minutes.
+This guide will help you install, configure, and deploy your first Kafka Connect WebSocket connector.
 
 ## Overview
 
@@ -11,75 +11,40 @@ The Kafka Connect WebSocket Source Connector enables you to stream real-time dat
 In this section, you'll learn how to:
 
 1. **[Prerequisites](prerequisites.md)** - Verify your environment has the required dependencies
-2. **[Installation](installation.md)** - Install the connector in your Kafka Connect cluster
-3. **[Quick Start](quick-start.md)** - Deploy your first connector and verify it's working
-
-## Typical Setup Flow
-
-```mermaid
-graph TD
-    A[Verify Prerequisites] --> B[Build Connector JAR]
-    B --> C[Install in Plugin Directory]
-    C --> D[Configure Plugin Path]
-    D --> E[Restart Kafka Connect]
-    E --> F[Deploy First Connector]
-    F --> G[Verify Message Flow]
-
-    style A fill:#3b82f6
-    style B fill:#3b82f6
-    style C fill:#3b82f6
-    style D fill:#3b82f6
-    style E fill:#f59e0b
-    style F fill:#10b981
-    style G fill:#10b981
-```
-
-## Time Estimates
-
-| Task | Estimated Time |
-|------|----------------|
-| Prerequisites verification | 5 minutes |
-| Building from source | 2 minutes |
-| Installation & configuration | 10 minutes |
-| First connector deployment | 5 minutes |
-| Verification & testing | 5 minutes |
-| **Total** | **~30 minutes** |
+2. **Installation** - Install the connector in your Kafka Connect cluster (see main README)
+3. **Quick Start** - Deploy your first connector and verify it's working (see main README)
 
 ## Deployment Options
 
 Choose the deployment method that best fits your environment:
 
-=== "Distributed Mode (Production)"
+### Distributed Mode (Production)
 
-    **Best for:**
-    - Production deployments
-    - High availability requirements
-    - Multiple connectors
-    - Horizontal scaling
+**Best for:**
+- Production deployments
+- High availability requirements
+- Multiple connectors
+- Horizontal scaling
 
-    **Configuration:**
-    ```properties
-    # config/connect-distributed.properties
-    plugin.path=/usr/local/share/kafka/plugins
-    ```
+**Configuration:**
+```properties
+# config/connect-distributed.properties
+plugin.path=/usr/local/share/kafka/plugins
+```
 
-    [Learn more about distributed mode →](installation.md#distributed-mode)
+### Standalone Mode (Development)
 
-=== "Standalone Mode (Development)"
+**Best for:**
+- Local development
+- Testing
+- Single connector instances
+- Quick prototyping
 
-    **Best for:**
-    - Local development
-    - Testing
-    - Single connector instances
-    - Quick prototyping
-
-    **Configuration:**
-    ```properties
-    # config/connect-standalone.properties
-    plugin.path=/usr/local/share/kafka/plugins
-    ```
-
-    [Learn more about standalone mode →](installation.md#standalone-mode)
+**Configuration:**
+```properties
+# config/connect-standalone.properties
+plugin.path=/usr/local/share/kafka/plugins
+```
 
 ## System Requirements
 
@@ -111,29 +76,23 @@ Choose the deployment method that best fits your environment:
 
 <div class="grid cards" markdown>
 
-- :material-download:{ .lg .middle } **[Installation](installation.md)**
+- :material-book-open:{ .lg .middle } **[Main README](https://github.com/conduktor/kafka-connect-websocket/blob/main/README.md)**
 
     ---
 
-    Step-by-step guide to install the connector in your Kafka Connect cluster.
+    Complete documentation with installation, configuration, and usage examples.
 
-- :material-rocket-launch:{ .lg .middle } **[Quick Start](quick-start.md)**
-
-    ---
-
-    Deploy your first connector and start streaming WebSocket data.
-
-- :material-cog:{ .lg .middle } **[Configuration](../configuration/index.md)**
+- :material-help-circle:{ .lg .middle } **[FAQ](../faq.md)**
 
     ---
 
-    Complete reference for all configuration parameters.
+    Frequently asked questions and troubleshooting tips.
 
-- :material-help-circle:{ .lg .middle } **[Troubleshooting](../operations/troubleshooting.md)**
+- :material-history:{ .lg .middle } **[Changelog](../changelog.md)**
 
     ---
 
-    Common issues and solutions for installation problems.
+    Version history, new features, and bug fixes.
 
 </div>
 
@@ -148,15 +107,15 @@ Choose the deployment method that best fits your environment:
     - [ ] Network access to your target WebSocket endpoint
 
 !!! warning "Production Considerations"
-    For production deployments, review the [Data Reliability](../reliability/index.md) section to understand the connector's at-most-once semantics and data loss scenarios.
+    For production deployments, review the Data Reliability section in the main README to understand the connector's at-most-once semantics and data loss scenarios.
 
 ## Next Steps
 
 Ready to install? Start with:
 
 1. [Prerequisites](prerequisites.md) - Verify your environment
-2. [Installation](installation.md) - Install the connector
-3. [Quick Start](quick-start.md) - Deploy your first connector
+2. [Main README](https://github.com/conduktor/kafka-connect-websocket/blob/main/README.md#installation) - Follow the installation guide
+3. [Examples](https://github.com/conduktor/kafka-connect-websocket/blob/main/README.md#usage-examples) - Deploy your first connector
 
 ---
 

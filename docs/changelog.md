@@ -202,7 +202,7 @@ cp target/kafka-connect-websocket-1.0.0.jar $KAFKA_HOME/plugins/kafka-connect-we
 ```
 
 **Important Notes:**
-- At-most-once delivery semantics (see [Data Reliability](reliability/index.md))
+- At-most-once delivery semantics (see Data Reliability section in README)
 - Single task per connector (WebSocket protocol limitation)
 - In-memory queue data lost on shutdown
 
