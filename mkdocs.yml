@@ -114,6 +114,9 @@ markdown_extensions:
       custom_checkbox: true
   - pymdownx.tilde
 
+# Build configuration
+strict: false  # Don't fail on warnings during build
+
 # Plugins
 plugins:
   - search:

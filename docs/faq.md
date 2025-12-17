@@ -498,7 +498,7 @@ mvn dependency:copy-dependencies -DincludeScope=runtime \
    - Increase partition count
    - Use SSD storage
 
-See [Queue Overflow Issues](operations/troubleshooting.md#queue-overflow-issues) for details.
+See the Troubleshooting section in the README for details on queue overflow issues.
 
 ## Compatibility
 
