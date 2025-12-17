@@ -44,13 +44,17 @@ This connector provides at-most-once delivery due to architectural limitations (
 
 ### Do I need to build from source?
 
-Yes, currently you need to build from source using Maven:
+**No.** Pre-built JARs are available from [GitHub Releases](https://github.com/conduktor/kafka-connect-websocket/releases):
 
 ```bash
-mvn clean package
+# Download the latest release
+wget https://github.com/conduktor/kafka-connect-websocket/releases/download/v1.0.0/kafka-connect-websocket-1.0.0-jar-with-dependencies.jar
+
+# Copy to plugin directory
+cp kafka-connect-websocket-1.0.0-jar-with-dependencies.jar $KAFKA_HOME/plugins/kafka-connect-websocket/
 ```
 
-A pre-built JAR distribution is planned for future releases.
+Building from source is only needed for development or custom modifications.
 
 ### Which Kafka version do I need?
 
@@ -84,18 +88,9 @@ Ensure `plugin.path` in `connect-distributed.properties` includes this location.
 
 ### Do I need separate dependency JARs?
 
-**Option 1 (Recommended):** Build an uber JAR with dependencies included:
-```bash
-mvn clean package shade:shade
-```
+**No.** The release JAR (`kafka-connect-websocket-X.X.X-jar-with-dependencies.jar`) includes all dependencies (OkHttp, Okio, Kotlin stdlib). Just download and deploy the single JAR file.
 
-**Option 2:** Copy dependencies separately:
-```bash
-mvn dependency:copy-dependencies -DincludeScope=runtime \
-  -DoutputDirectory=$KAFKA_HOME/plugins/kafka-connect-websocket/
-```
-
-Required dependencies: OkHttp (4.12.0), Okio, Kotlin stdlib.
+If building from source, `mvn clean package` produces an uber JAR with all dependencies included.
 
 ## Configuration
 
@@ -465,16 +460,13 @@ systemctl restart kafka-connect
 
 ### Why do I get "NoClassDefFoundError: okhttp3/WebSocket"?
 
-**Cause:** Missing OkHttp dependency.
+**Cause:** Using the wrong JAR file (connector JAR without dependencies).
 
-**Solution:**
+**Solution:** Use the uber JAR from [GitHub Releases](https://github.com/conduktor/kafka-connect-websocket/releases):
+
 ```bash
-# Option 1: Use uber JAR
-mvn clean package shade:shade
-
-# Option 2: Copy dependencies
-mvn dependency:copy-dependencies -DincludeScope=runtime \
-  -DoutputDirectory=$KAFKA_HOME/plugins/kafka-connect-websocket/
+# Download the jar-with-dependencies (includes OkHttp)
+wget https://github.com/conduktor/kafka-connect-websocket/releases/download/v1.0.0/kafka-connect-websocket-1.0.0-jar-with-dependencies.jar
 ```
 
 ### Why is my queue constantly full?
@@ -522,16 +514,14 @@ Yes, deploy Kafka Connect in Kubernetes and include this connector in the plugin
 
 ### Does this work with Docker?
 
-Yes, create a custom Kafka Connect Docker image:
+Yes. See the `examples/` directory for a complete Docker Compose setup, or create a custom image:
 
 ```dockerfile
 FROM confluentinc/cp-kafka-connect:7.5.0
 
-# Copy connector and dependencies
-COPY kafka-connect-websocket-1.0.0.jar /usr/share/confluent-hub-components/kafka-connect-websocket/
-COPY okhttp-4.12.0.jar /usr/share/confluent-hub-components/kafka-connect-websocket/
-COPY okio-*.jar /usr/share/confluent-hub-components/kafka-connect-websocket/
-COPY kotlin-stdlib-*.jar /usr/share/confluent-hub-components/kafka-connect-websocket/
+# Copy the uber JAR (includes all dependencies)
+COPY kafka-connect-websocket-1.0.0-jar-with-dependencies.jar \
+  /usr/share/confluent-hub-components/kafka-connect-websocket/
 ```
 
 ## Still Have Questions?
