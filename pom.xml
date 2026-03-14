@@ -113,12 +113,12 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- Kafka client for consuming test messages -->
+        <!-- Kafka client (config classes moved out of connect-api in Kafka 3.9+) -->
         <dependency>
             <groupId>org.apache.kafka</groupId>
             <artifactId>kafka-clients</artifactId>
             <version>${kafka.version}</version>
-            <scope>test</scope>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 
